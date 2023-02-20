@@ -45,13 +45,14 @@ namespace Knapper
 
 			Vector2[][] result;
 
-			
+			/*
 			stopwatch.Restart();
 			result = GetCombinationOptimized(items);
 			
 			printCombinations(result);
 			Vector2[] value = getBestCapacity(GetCombinationOptimizedParallel(items), maxCapacity);
 			Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
+			*/
 
 			/*
 			stopwatch.Restart();
