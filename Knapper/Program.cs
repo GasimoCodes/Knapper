@@ -11,36 +11,36 @@ namespace Knapper
 		static void Main(string[] args)
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
-			int maxCapacity = 65;
+			int maxCapacity = 60;
 
-
+			// Weight, value
 			Vector2[] items = {
 				new Vector2(1, 10),
 				new Vector2(2, 4),
 				new Vector2(4, 12),
-								new Vector2(1, 10),
-				new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(1, 10),
-				new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(1, 10),
-				new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(1, 10),
-				new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(2, 4),
-				new Vector2(4, 12),
-								new Vector2(2, 4),
-				new Vector2(4, 12),
-
+				new Vector2(5, 10),
+				new Vector2(6, 4),
+				new Vector2(7, 12),
+				new Vector2(8, 10),
+				new Vector2(9, 4),
+				new Vector2(10, 12),
+				new Vector2(11, 4),
+				new Vector2(12, 12),
+				new Vector2(13, 4),
+				new Vector2(14, 12),
+				new Vector2(15, 4),
+				new Vector2(16, 12),
+				new Vector2(17, 10),
+								new Vector2(8, 10),
+				new Vector2(9, 4),
+				new Vector2(10, 12),
+				new Vector2(11, 4),
+				new Vector2(12, 12),
+				new Vector2(13, 4),
+				new Vector2(14, 12),
+				new Vector2(15, 4),
+				new Vector2(16, 12),
+				new Vector2(17, 10),
 			};
 
 			Vector2[][] result;
@@ -48,34 +48,21 @@ namespace Knapper
 			
 			stopwatch.Restart();
 			result = GetCombinationOptimized(items);
-			Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
 			
-			//Console.ReadLine();
 			printCombinations(result);
-
-
-
-			stopwatch.Restart();
-			result = GetCombinationOptimizedThreaded(items);
+			Vector2[] value = getBestCapacity(GetCombinationOptimizedParallel(items), maxCapacity);
 			Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
-
-			//Console.ReadLine();
-			printCombinations(result);
 
 			/*
 			stopwatch.Restart();
 			result = GetCombinationOptimizedParallel(items);
 			Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
-			
-			//Console.ReadLine();
 			printCombinations(result);
-			
 			*/
 
-			
-
-			// Vector2[] value = getBestCapacity(GetCombinationOptimizedParallel(items), 3);
-
+			stopwatch.Restart();
+			KnapsackSolver(items, maxCapacity);
+			Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
 		}
 
 
@@ -98,44 +85,61 @@ namespace Knapper
 					// Check whether to include the item in the combination using bit shift
 					if ((combinationIndex & (1 << elementIndex)) != 0)
 					{
-						//Console.Write(list[elementIndex].X);
 						combination.Add(list[elementIndex]);
 					}
 				}
 
 				results[combinationIndex - 1] = combination.ToArray();
-				//Console.WriteLine();
+
 			}
 
 			return results;
 		}
 
-		public static Vector2[] getBestCapacity(Vector2[][] input, int maxCapacity)
+		public static Vector2[] KnapsackSolver(Vector2[] list, int capacity)
 		{
-			// Index same as input index, (int1 = value, int2 = weight)
-			Dictionary<KeyValuePair<int, int>, Vector2[]> values = new Dictionary<KeyValuePair<int, int>, Vector2[]>();
+			list = list.OrderByDescending(x => x.Y).ToArray();
 
-			foreach (Vector2[] val in input)
+			int n = list.Length;
+			int count = (1 << n) - 1;
+			
+			// Combination index, Item index
+			bool[][] results = new bool[count][];
+			// Combination index, weight, value
+			Vector2[] resultValues = new Vector2[count];
+
+
+			int bestResultIndex = 0;
+
+			// For each combination
+			for (int combinationIndex = 1; combinationIndex <= count; combinationIndex++)
 			{
-				int value = (int)val.Sum(x => x.Y);
-				int weight = (int)val.Sum(x => x.X);
 
-				//				KeyValuePair<int, int> keyPair = new KeyValuePair<int, int> ( value, weight );
-
-				values.TryAdd(new KeyValuePair<int, int>(value, weight), val);
-			}
-
-			foreach (KeyValuePair<KeyValuePair<int, int>, Vector2[]> val in values.OrderByDescending(x => x.Key.Key))
-			{
-				if (val.Key.Value <= maxCapacity)
+				// For each element in list
+				for (int elementIndex = 0; elementIndex < n; elementIndex++)
 				{
-					Console.WriteLine($"VALUE: {val.Key.Key} WEIGHT: {val.Key.Value}");
-					return val.Value;
+					// Check whether to include the item in the combination using bit shift
+					if ((combinationIndex & (1 << elementIndex)) != 0)
+					{
+						// results[combinationIndex - 1][elementIndex-1] = true;
+						resultValues[combinationIndex - 1].X += list[elementIndex].X;
+						resultValues[combinationIndex - 1].Y += list[elementIndex].Y;
+					}
 				}
+
+				// If the current combination is better than the last best
+				if(resultValues[combinationIndex-1].X <= capacity && resultValues[combinationIndex-1].Y > resultValues[bestResultIndex].Y)
+					bestResultIndex = (combinationIndex-1);
+
 			}
+
+			Console.WriteLine("BEST WEIGHT: " + resultValues[bestResultIndex].X + " BEST VALUE: " + resultValues[bestResultIndex].Y);
 
 			return null;
 		}
+
+
+
 
 		public static Vector2[][] GetCombinationOptimizedParallel(Vector2[] list)
 		{
@@ -177,29 +181,6 @@ namespace Knapper
 			return results;
 		}
 
-
-
-
-
-
-		public static void printCombinations(Vector2[][] list)
-		{
-			string toWrite = "";
-			/*
-			foreach (Vector2[] innerList in list)
-			{
-				foreach (Vector2 inner in innerList)
-				{
-					toWrite += (inner.X + ",");
-				}
-				toWrite += "\n";
-			}
-			*/
-			toWrite += ("---\n TOTAL OF: " + list.Length + "\n---");
-
-			Console.WriteLine(toWrite);
-
-		}
 
 
 		private static Vector2[][] GetCombinationOptimizedThreaded(Vector2[] list)
@@ -249,6 +230,55 @@ namespace Knapper
 			return results;
 
 		}
+
+
+		public static Vector2[] getBestCapacity(Vector2[][] input, int maxCapacity)
+		{
+			// Index same as input index, (int1 = weight, int2 = value)
+			Dictionary<KeyValuePair<int, int>, Vector2[]> values = new Dictionary<KeyValuePair<int, int>, Vector2[]>();
+
+			foreach (Vector2[] val in input)
+			{
+				int weight = (int)val.Sum(x => x.X);
+				int value = (int)val.Sum(x => x.Y);
+
+				values.TryAdd(new KeyValuePair<int, int>(weight, value), val);
+			}
+
+			foreach (KeyValuePair<KeyValuePair<int, int>, Vector2[]> val in values.OrderByDescending(x => x.Key.Value))
+			{
+				if (val.Key.Key <= maxCapacity)
+				{
+					Console.WriteLine($"VALUE: {val.Key.Value} WEIGHT: {val.Key.Key}");
+					return val.Value;
+				}
+			}
+
+			return null;
+		}
+
+
+		public static void printCombinations(Vector2[][] list)
+		{
+			string toWrite = "";
+			/*
+			foreach (Vector2[] innerList in list)
+			{
+				foreach (Vector2 inner in innerList)
+				{
+					toWrite += (inner.X + ",");
+				}
+				toWrite += "\n";
+			}
+			*/
+			toWrite += ("---\n TOTAL OF: " + list.Length + "\n---");
+
+			Console.WriteLine(toWrite);
+
+		}
+
+
+
 
 	}
 }
