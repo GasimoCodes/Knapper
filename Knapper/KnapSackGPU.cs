@@ -132,8 +132,11 @@ namespace Knapper
 
         static void KernelBestValue(Index1D index, ArrayView<Vector2> data, ArrayView<Vector3> bestValue)
         {
+            // Run for X elements
+            // Save best on index(i)
+            // Wait to synchronize
 
-            
+
             /*
             // If the current combination is better than the last best
             if (weight <= capacity && value > bestResult.Y)

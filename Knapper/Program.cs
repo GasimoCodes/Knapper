@@ -16,7 +16,7 @@ namespace Knapper
 	{
 		static void Main(string[] args)
 		{
-			int maxCapacity = 3;
+			int maxCapacity = 10;
 
 			// Weight, value
 			Vector2[] items = {
@@ -24,45 +24,30 @@ namespace Knapper
 				new Vector2(2, 4),
 				new Vector2(3, 15),
 				new Vector2(3, 15),
-                
-                new Vector2(2, 4),
-                              new Vector2(1, 10),
-                new Vector2(2, 4),
-                                new Vector2(1, 10),
-                new Vector2(2, 4),
-                              new Vector2(1, 10),
-                new Vector2(2, 4),
-                                new Vector2(1, 10),
-                new Vector2(2, 4),
-                              new Vector2(1, 10),
-                new Vector2(2, 4),
-                                new Vector2(1, 10),
-                new Vector2(2, 4),
-                              new Vector2(1, 10),
-                new Vector2(2, 4),
-				/*
-                                new Vector2(1, 10),
-                new Vector2(2, 4),
-                              new Vector2(1, 10),
-                new Vector2(2, 4),
-                                new Vector2(1, 10),
-                new Vector2(2, 4),
-                              new Vector2(1, 10),
-                new Vector2(2, 4),
-                                new Vector2(1, 10),
-                new Vector2(2, 4),*/
-
-            };
+				new Vector2(1, 10),
+				new Vector2(2, 4),
+				new Vector2(3, 15),
+				new Vector2(3, 15),
+				new Vector2(1, 10),
+				new Vector2(2, 4),
+				new Vector2(3, 15),
+				new Vector2(3, 15),
+				new Vector2(1, 10),
+				new Vector2(2, 4),
+				new Vector2(3, 15),
+			};
 
 
 			// GPU
-			// KnapSackGPU.KnapsackSolver(items, maxCapacity);
+			KnapSackGPU.KnapsackSolver(items, maxCapacity);
 
-			
+
 			// Approx.
 			KnapSackHeuristics.KnapsackSolver(items, maxCapacity);
 
+
 			// CPU
+			/*
 			KnapsackSolver(items, maxCapacity);
 
 			KnapsackSolverThreaded(items, maxCapacity);
@@ -74,7 +59,7 @@ namespace Knapper
 
 			Console.WriteLine("Total items: " + items.Length);
 
-
+			*/
 
 			/*
             stopwatch.Restart();
@@ -202,16 +187,16 @@ namespace Knapper
 		public static void printCombinations(Vector2[][] list)
 		{
 			string toWrite = "";
-			/*
-			foreach (Vector2[] innerList in list)
-			{
-				foreach (Vector2 inner in innerList)
+			/*	
+				foreach (Vector2[] innerList in list)
 				{
-					toWrite += (inner.X + ",");
+					foreach (Vector2 inner in innerList)
+					{
+						toWrite += (inner.X + ",");
+					}
+					toWrite += "\n";
 				}
-				toWrite += "\n";
-			}
-			*/
+				*/
 			toWrite += ("---\n TOTAL OF: " + list.Length + "\n---");
 
 			Console.WriteLine(toWrite);
