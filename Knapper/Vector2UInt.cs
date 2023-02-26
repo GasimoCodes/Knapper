@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Knapper
 {
+    /// <summary>
+    /// Stores 2D Vector of UInts
+    /// </summary>
     public struct Vector2UInt
     {
         public uint weight { get; set; }

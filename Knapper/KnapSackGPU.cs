@@ -16,10 +16,19 @@ using ILGPU.Backends;
 
 namespace Knapper
 {
+    /// <summary>
+    /// Knapsack solver for the GPU
+    /// </summary>
     public static class KnapSackGPU
     {
 
-
+        /// <summary>
+        /// Solves the knapsack problem on the GPU
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="capacity"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
         public static void KnapsackSolver(Vector2UInt[] list, uint capacity, ulong start = 0, ulong end = 0)
         {
             using Context context = Context.Create(builder => builder.AllAccelerators());
@@ -57,7 +66,7 @@ namespace Knapper
 
             if ((ulong)acc.MaxNumThreads > delta)
             {
-                memoryBlocks = (long)(delta * sizeof(uint) * 6);
+                memoryBlocks = 1;
             } 
             else
             {

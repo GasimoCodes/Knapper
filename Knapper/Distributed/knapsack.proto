@@ -1,0 +1,22 @@
+﻿syntax = "proto3";
+
+package KnapsackSolver;
+
+message Vector2UInt {
+  uint32 weight = 1;
+  uint32 value = 2;
+}
+
+message KnapsackInput {
+  repeated Vector2UInt list = 1;
+  uint32 capacity = 2;
+}
+
+message KnapsackOutput {
+  repeated bool currentBestBits = 1;
+  Vector2UInt bestResult = 2;
+}
+
+service KnapsackSolver {
+  rpc SolveKnapsack(KnapsackInput) returns (KnapsackOutput) {}
+}

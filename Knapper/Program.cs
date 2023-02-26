@@ -23,10 +23,6 @@ namespace Knapper
             Vector2UInt[] items = {
                 new Vector2UInt(1, 10),
                 new Vector2UInt(2, 4),
-                new Vector2UInt(3, 15)/*,
-                new Vector2UInt(3, 15),
-                new Vector2UInt(1, 10),
-                new Vector2UInt(2, 4),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(1, 10),
@@ -37,6 +33,10 @@ namespace Knapper
                 new Vector2UInt(2, 4),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
+                new Vector2UInt(1, 10),
+                new Vector2UInt(2, 4),
+                new Vector2UInt(3, 15),
+                new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
@@ -48,46 +48,25 @@ namespace Knapper
                 new Vector2UInt(2, 4),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
-                new Vector2UInt(3, 15),
-                new Vector2UInt(3, 15),
-                new Vector2UInt(2, 4),
-                new Vector2UInt(3, 15),
-                new Vector2UInt(3, 15),
-                new Vector2UInt(3, 15)*/
             };
-            Console.WriteLine("Total items: " + items.Length);
-
+            Console.WriteLine("Total items: " + items.Length + "\n");
 
 
             // GPU
             KnapSackGPU.KnapsackSolver(items, maxCapacity);
 
-
             // Approx.
-            KnapSackHeuristics.KnapsackSolver(items, maxCapacity);
+            KnapSackApprox.KnapsackSolver(items, maxCapacity);
 
 
             // CPU
-            // KnapSackCPU.KnapsackSolver(items, maxCapacity);
-
             stopwatch.Restart();
-            KnapSackCPU.KnapsackSolverThreaded(items, maxCapacity);
+            KnapSackCPU.KnapsackSolverThreadedLock(items, maxCapacity);
             Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
-            
 
 
-
-
-
-
-            /*
-            stopwatch.Restart();
-            
-            Console.WriteLine(stopwatch.ElapsedMilliseconds + "ms");
-            */
 
         }
-
 
 
 
