@@ -20,7 +20,7 @@ namespace Knapper
     {
 
 
-        public static void KnapsackSolver(Vector2[] list, int capacity)
+        public static void KnapsackSolver(Vector2UInt[] list, uint capacity, ulong start = 0, ulong end = 0)
         {
             using Context context = Context.Create(builder => builder.AllAccelerators());
             Device d = context.GetPreferredDevice(preferCPU: false);
@@ -28,54 +28,82 @@ namespace Knapper
 
             int n = list.Length;
             ulong combinationCount = (1UL << n) - 1;
-            
+
+            if (end == 0)
+            {
+                end = combinationCount;
+            }
+
+            // How many items we need to go through
+            ulong delta = end - start;
+
             // Allocate and copy the init list
-            MemoryBuffer1D<Vector2, Stride1D.Dense> inputs = acc.Allocate1D(list);
-            // Allocate Vector for each thread
-            MemoryBuffer1D<Vector3, Stride1D.Dense> results = acc.Allocate1D<Vector3>(acc.MaxNumThreads);
-            MemoryBuffer1D<Vector3, Stride1D.Dense> staticMemory = acc.Allocate1D<Vector3>(0);
+            MemoryBuffer1D<Vector2UInt, Stride1D.Dense> inputs = acc.Allocate1D(list);
 
-
-            Console.WriteLine($"DEV: {acc.Name}");
-            Console.WriteLine($"\nTOTAL COMBINATIONS: {combinationCount}");
-            Console.WriteLine("AVAILABLE THREADS: " + acc.MaxNumThreads);
-
-            int iterCount = (int)((combinationCount + (ulong)acc.MaxNumThreads - 1UL) / (ulong)acc.MaxNumThreads);
+            // IterationCount = CombinationCount / MaxNumThreads
+            int iterCount = (int)(((delta) + (ulong)acc.MaxNumThreads - 1UL) / (ulong)acc.MaxNumThreads);
             int chunkSize = acc.MaxNumThreads;
-            Console.WriteLine("App will run for " + iterCount + " iteration(s)\n\n");
+
+
+            Console.WriteLine($"\nDEVICE:\t{acc.Name}\n" +
+                $"SPEED:     \t{acc.MaxNumThreads}/it. ({iterCount} it.)\n" +
+                $"MEMORY:     \t{acc.MemorySize / 1000000} MB\n" +
+                $"COMBINATIONS:\t{delta}/{combinationCount}\n");
+
             
-            
+            // Max amount of iterations we can store in memory at a given time
+            long memoryBlocks = (acc.MemorySize / (acc.MaxNumThreads * sizeof(uint)*6));
+            Console.WriteLine($"Layout: " + memoryBlocks + " iterations can be stored (" + (memoryBlocks * chunkSize * sizeof(uint) * 3 / 1000000) + "MB)");
+
+            // Allocate all the vector groups we can (with a reserve)
+            MemoryBuffer1D<Vector3UInt, Stride1D.Dense> results = acc.Allocate1D<Vector3UInt>(memoryBlocks * chunkSize);
+
+            // Allocate array for sending compiled data back to PC
+            MemoryBuffer1D<Vector3UInt, Stride1D.Dense> transferResults = acc.Allocate1D<Vector3UInt>(64);
+
             // Upload kernel
-            Action<Index1D, ArrayView<Vector2>, ArrayView<Vector3>, int, ArrayView<Vector3>> loadedKernel =
-    acc.LoadAutoGroupedStreamKernel<Index1D, ArrayView<Vector2>, ArrayView<Vector3>, int, ArrayView<Vector3>>(Kernel);
+            Action<Index1D, ArrayView<Vector2UInt>, ArrayView<Vector3UInt>, ulong> loadedKernel =
+            acc.LoadAutoGroupedStreamKernel<Index1D, ArrayView<Vector2UInt>, ArrayView<Vector3UInt>, ulong>(Kernel);
 
-
-            Vector2 bestResult = new Vector2();
-            bool[] currentBestBits = new bool[n];
 
             Stopwatch sw = Stopwatch.StartNew();
+
+
+            int collapseEvery = Math.Min(iterCount, 4);
+            int collapseEveryCounter = 0;
+
 
 
             // Repeat this until we went over ALL the elements
             for (int t = 0; t < iterCount; t++)
             {
-                // What will we cover in this iteration
-                int start = t * chunkSize;
-                int end = (int)Math.Min(((ulong)t + 1UL) * (ulong)chunkSize, combinationCount);
+                collapseEveryCounter++;
 
-                // Console.WriteLine("START: " + start + "END " + end);
+                // Start from 0 or the last group index
+                ulong groupStart = (ulong)(t * chunkSize);
+                ulong groupEnd;
+                
+                if(((ulong)(t + 1) * (ulong)chunkSize) < combinationCount-1)
+                {
+                    // End on last combination of current group
+                    groupEnd = (ulong)((t + 1) * chunkSize);
 
-                loadedKernel(end-start, inputs.View, results.View, start, staticMemory.View);
+                } else
+                {
+                    // Otherwise, end is last combination.
+                    groupEnd = combinationCount;
+                }
+
+                // Console.WriteLine("START: " + groupStart + "\tEND " + groupEnd + " DELTA: " + (groupEnd  - groupStart));
+
+
+
+                loadedKernel((int)(groupEnd-groupStart), inputs.View, results.View, groupStart);
                 acc.Synchronize();
 
-
-                // Get best value, somehow
-
-
-                // Store best value
-
-
             }
+
+
 
             sw.Stop();
 
@@ -84,68 +112,65 @@ namespace Knapper
             foreach (Vector2 output in results.GetAsArray1D())
             {
                 Console.WriteLine($"X: {output.X}, Y: {output.Y}");
-            }*/
+            }
+            */
 
-            Console.WriteLine(sw.ElapsedMilliseconds + "ms");
+            Console.WriteLine(sw.ElapsedMilliseconds + "ms\n\n");
 
             acc.Dispose();
             context.Dispose();
-
-
         }
 
 
-        static void Kernel(Index1D index, ArrayView<Vector2> data, ArrayView<Vector3> output, int indexOffset, ArrayView<Vector3> bestValue)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        static void Kernel(Index1D index, ArrayView<Vector2UInt> data, ArrayView<Vector3UInt> output, ulong indexOffset)
         {
 
-            float value = 0;
-            float weight = 0;
-            int combinationIndex = (index+1)+ indexOffset;
+            uint value = 0;
+            uint weight = 0;
 
+            //index of the combination
+            ulong combinationIndex = (ulong)index + indexOffset;
 
             for (int elementIndex = 0; elementIndex < data.Length; elementIndex++)
             {
-                if (((combinationIndex) & (1 << elementIndex)) != 0)
+                if (((combinationIndex) & (ulong)(1 << elementIndex)) != 0)
                 {
-                    value += data[elementIndex].X;
-                    weight += data[elementIndex].Y;
-                    // currentBits[elementIndex] = true;
-                }
-                else
-                {
-                    // currentBits[elementIndex] = false;
+                    value += data[elementIndex].weight;
+                    weight += data[elementIndex].value;
                 }
             }
 
-            /*
-            // If the current combination is better than the last best
-            if (weight <= capacity && value > bestResult.Y)
-            {
-                bestResult = new Vector2(weight, value);
-                currentBestBits = currentBits;
-            }
-            */
-
-            output[index] = new Vector3(weight, value, (combinationIndex-1));
+            output[index] = new Vector3UInt(weight, value, combinationIndex-1);
         }
 
 
-        static void KernelBestValue(Index1D index, ArrayView<Vector2> data, ArrayView<Vector3> bestValue)
+        static void KernelBestValue(Index1D index, ArrayView<Vector3UInt> data, int amount, int maxCarry)
         {
-            // Run for X elements
-            // Save best on index(i)
-            // Wait to synchronize
-
-
-            /*
-            // If the current combination is better than the last best
-            if (weight <= capacity && value > bestResult.Y)
+            // For each element of chunk
+            for (int i = index; i <= amount + index; i++)
             {
-                bestResult = new Vector2(weight, value);
-                currentBestBits = currentBits;
+                // Compare to first, if better
+                if (data[i].weight <= maxCarry && data[i].value > data[index].value)
+                {
+                    // Replace first
+                    data[index] = data[i];
+                }
             }
-            */
-
         }
 
 
