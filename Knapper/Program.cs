@@ -23,11 +23,7 @@ namespace Knapper
             Vector2UInt[] items = {
                 new Vector2UInt(1, 10),
                 new Vector2UInt(2, 4),
-                new Vector2UInt(3, 15),
-                new Vector2UInt(3, 15),
-                new Vector2UInt(1, 10),
-                new Vector2UInt(2, 4),
-                new Vector2UInt(3, 15),
+                new Vector2UInt(3, 15)/*,
                 new Vector2UInt(3, 15),
                 new Vector2UInt(1, 10),
                 new Vector2UInt(2, 4),
@@ -37,6 +33,10 @@ namespace Knapper
                 new Vector2UInt(2, 4),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
+                new Vector2UInt(1, 10),
+                new Vector2UInt(2, 4),
+                new Vector2UInt(3, 15),
+                new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
@@ -49,7 +49,11 @@ namespace Knapper
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
                 new Vector2UInt(3, 15),
-
+                new Vector2UInt(3, 15),
+                new Vector2UInt(2, 4),
+                new Vector2UInt(3, 15),
+                new Vector2UInt(3, 15),
+                new Vector2UInt(3, 15)*/
             };
             Console.WriteLine("Total items: " + items.Length);
 
@@ -88,19 +92,16 @@ namespace Knapper
 
 
 
-        public static void printCombinations(Vector2[][] list)
+        public static void printCombinations(Vector3UInt[] list)
         {
             string toWrite = "";
-            /*	
-				foreach (Vector2[] innerList in list)
+            
+				foreach (Vector3UInt innerList in list)
 				{
-					foreach (Vector2 inner in innerList)
-					{
-						toWrite += (inner.X + ",");
-					}
+						toWrite += (innerList.weight+ "," + innerList.value);
 					toWrite += "\n";
 				}
-				*/
+				
             toWrite += ("---\n TOTAL OF: " + list.Length + "\n---");
 
             Console.WriteLine(toWrite);
