@@ -21,7 +21,7 @@ This code is not intended for production and is provided as is.
 
 ## Usage
 
-**Example:**
+### Example
 ```csharp
 KnapSackCPU.KnapsackSolverThreaded(items, maxCapacity);
 ```
@@ -30,7 +30,7 @@ maxCapacity - Knapsack capacity, uint limit.
 
 Returns the solution in `Vector3UInt (weight, value, combinationIndex)` format.
 
-**Example approximation:**
+### Example approximation
 ```csharp
 KnapSackApprox.KnapsackSolver(items, maxCapacity);
 ```
