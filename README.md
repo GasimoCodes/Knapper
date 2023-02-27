@@ -26,6 +26,7 @@ This code is not intended for production and is provided as is.
 KnapSackCPU.KnapsackSolverThreaded(items, maxCapacity);
 ```
 Items - `Vector2UInt[](uint weight, uint value)` array of items to put in Knapsack
+
 maxCapacity - Knapsack capacity, uint limit.
 
 Returns the solution in `Vector3UInt (weight, value, combinationIndex)` format.
@@ -35,6 +36,7 @@ Returns the solution in `Vector3UInt (weight, value, combinationIndex)` format.
 KnapSackApprox.KnapsackSolver(items, maxCapacity);
 ```
 Items - `Vector2UInt[](uint weight, uint value)` array of items to put in Knapsack
+
 maxCapacity - Knapsack capacity, uint limit.
 
 Returns  `Vector2UInt[](uint weight, uint value)` of items in the Knapsack.
